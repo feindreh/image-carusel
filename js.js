@@ -1,26 +1,117 @@
-const maxSequence = function (arr) {
-  // ...
-  if (arr.length === 0) { return 0; }
+const display = document.querySelector('#count');
+const pFrame = document.querySelector('#framePrevious');
+const mFrame = document.querySelector('#frameMain');
+const nFrame = document.querySelector('#frameNext');
+const previousButton = document.querySelector('#previous');
+const nextButton = document.querySelector('#next');
 
-  while (changes) {
-    for (let i = 0; i < arr.length; i++) {
-      if (arr.slice(0, i).reduce((a, b) => a + b, 0) < 0) {
-        arr.splice(0, i); i = -1;
-      }
-    }
-    for (let i = 0; i < arr.length; i++) {
-      if (arr.slice(-i).reduce((a, b) => a + b, 0) < 0) {
-        arr.splice(-i); i = -1;
-      }
-    }
-  }
-
-  const sum = arr.reduce((a, b) => a + b, 0);
-
-  if (sum > 0) { return sum; }
-  return 0;
+const collection = {
+  images: [],
+  counter: 0,
 };
+let timeID;
+for (let i = 1; i <= 10; i++) {
+  if (i === 4 || i === 9) { continue; }
+  const img = document.createElement('img');
+  img.src = `./img/pfal${i}.jpg`;
+  collection.images.push(img);
+}
+function changeText() {
+  display.innerText = `${collection.counter + 1}/${collection.images.length}`;
+}
+function getCount(change) {
+  let count = collection.counter;
+  count += change;
+  if (count === collection.images.length) { return 0; }
+  if (count === -1) { return collection.images.length - 1; }
+  return count;
+}
+function appendLeft() {
+  const left = collection.images[getCount(-1)];
+  left.id = 'left';
+  left.style.animation = 'create 0.5s linear';
+  mFrame.append(left);
+}
+function appendRight() {
+  const right = collection.images[getCount(1)];
+  right.id = 'right';
+  right.style.animation = 'create 0.5s linear';
+  mFrame.append(right);
+}
+function appendMain() {
+  const main = collection.images[getCount(0)];
+  main.id = 'main';
+  main.style.animation = 'create 0.5s linear';
+  mFrame.append(main);
+}
+function goNext() {
+  const left = document.querySelector('#left');
+  const main = document.querySelector('#main');
+  const right = document.querySelector('#right');
+  left.remove();
+  main.id = 'left';
+  right.id = 'main';
+  collection.counter = getCount(1);
+  appendRight();
+  changeText();
+  markSlide();
+  clearInterval(timeID);
+  afk();
+}
+function goPrevious() {
+  const left = document.querySelector('#left');
+  const main = document.querySelector('#main');
+  const right = document.querySelector('#right');
+  right.remove();
+  main.id = 'right';
+  left.id = 'main';
+  collection.counter = getCount(-1);
+  appendLeft();
+  changeText();
+  markSlide();
+  clearInterval(timeID);
+  afk();
+}
+function removeAll() {
+  while (mFrame.childNodes.length > 0) {
+    mFrame.firstChild.remove();
+  }
+}
+function update() {
+  removeAll();
+  changeText();
+  appendRight();
+  appendLeft();
+  appendMain();
+  markSlide();
+  clearInterval(timeID);
+  afk();
+}
+function markSlide() {
+  slider.childNodes.forEach((node) => node.id = '');
+  slider.childNodes[collection.counter].id = 'marked';
+}
+function afk() { timeID = setInterval(goNext, 10000); }
+document.body.addEventListener('keydown', (e) => {
+  if (e.code === 'ArrowLeft') { goPrevious(); }
+  if (e.code === 'ArrowRight') { goNext(); }
+});
+nextButton.addEventListener('click', () => {
+  goNext();
+});
+previousButton.addEventListener('click', () => {
+  goPrevious();
+});
 
-console.log(maxSequence(
-  [34, 44, -11, -47, 35, 20, -21, -5, 26, -23, 39, -48, -25, -28, 27, -11, 16, -26, -32, -34],
-));
+const slider = document.querySelector('#slider');
+for (let i = 0; i < collection.images.length; i++) {
+  const slide = document.createElement('div');
+  slide.className = 'slide';
+  slide.addEventListener('click', () => {
+    collection.counter = i;
+    update();
+  });
+  slider.append(slide);
+}
+
+update();
