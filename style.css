@@ -131,3 +131,9 @@ img{
 #next:active,#previous:active{
   transform: translate(0px,3px) ;
 }
+
+#count{
+  align-self: center;
+  font-weight: bold;
+  font-size: 20px;
+}
